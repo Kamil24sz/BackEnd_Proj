@@ -1,0 +1,92 @@
+<script>
+
+    async function checkUser(){
+        const requestURL = '/api/user/check';
+
+        const requestData = {};
+
+        const response = await fetch(requestURL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseData = await response.json();
+
+        alert(responseData);
+
+        console.log(responseData);
+    }
+
+    async function registerUser(){
+        const requestURL = '/api/user/register';
+
+        const requestData = {
+            name: 'Test',
+            surname: 'User',
+            password: 'Test-User-password',
+            email: 'testuser@wsei.com'
+        };
+
+        const response = await fetch(requestURL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseData = await response.json();
+
+        console.log(responseData);
+    }
+
+    async function loginUser(){
+        const requestURL = '/api/user/login';
+
+        const requestData = {
+            email: 'admin',
+            password: 'admin'
+        };
+
+        const response = await fetch(requestURL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseData = await response.json();
+
+        console.log(responseData);
+    }
+
+    async function logoutUser(){
+        const requestURL = '/api/user/logout';
+
+        const requestData = {};
+
+        const response = await fetch(requestURL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': "application/json"
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseData = await response.json();
+
+        console.log(responseData);
+    }
+</script>
+<button onclick="checkUser()">Check user</button>
+<button onclick="registerUser()">Register user</button>
+<button onclick="loginUser()">Login user (admin, admin)</button>
+<button onclick="logoutUser()">Logout user</button>
