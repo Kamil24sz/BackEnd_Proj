@@ -23,6 +23,8 @@ public class AuthenticationController {
 
     final private AuthenticationService authenticationService;
 
+    final private UserService userService;
+
     @RequestMapping(
             value = "/api/user/check",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -56,10 +58,10 @@ public class AuthenticationController {
             return "Failed! (User already logged in)";
 
         try {
-            if(this.authenticationService.registerUser(userRegisterRequest)) {
+            if(this.userService.createNewUser(userRegisterRequest)) {
                 return "Success!";
             }
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             String error = e.toString(); //TODO log
 

@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import com.example.demo.models.*;
+import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -29,13 +30,11 @@ public class SetupDataLoader implements
     @Autowired
     private PrivilegeRepository privilegeRepository;
 
-    @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     @Transactional
@@ -53,17 +52,19 @@ public class SetupDataLoader implements
         createRoleIfNotFound("ROLE_ADMIN", adminPrivileges);
         createRoleIfNotFound("ROLE_USER", Arrays.asList(readPrivilege));
 
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-        UserEntity user = new UserEntity();
-        user.setFirstname("Test");
-        user.setLastname("Test");
-        user.setPassword(bCryptPasswordEncoder.encode("test"));
-        user.setEmail("test@test.com");
-        user.setRoles(Arrays.asList(adminRole));
-        user.setEnabled(true);
-        userRepository.save(user);
+        if(!userService.checkIfUserExists("test@test.com")) {
+            Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+            UserEntity user = new UserEntity();
+            user.setFirstname("Test");
+            user.setLastname("Test");
+            user.setPassword(bCryptPasswordEncoder.encode("test"));
+            user.setEmail("test@test.com");
+            user.setRoles(Arrays.asList(adminRole));
+            user.setEnabled(true);
+            userRepository.save(user);
 
-        alreadySetup = true;
+            alreadySetup = true;
+        }
     }
 
     @Transactional

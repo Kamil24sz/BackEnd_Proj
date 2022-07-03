@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -32,6 +33,13 @@ public class UsersController {
 
     @GetMapping("/api/users/add")
     public ResponseEntity<List<UserEntity>> addUsers() {
+        if(userService.addUsers() == null) {
+            UserEntity user = new UserEntity(0L,"Użytkownicy już istnieją","Użytkownicy już istnieją","","",false,false,null);
+            ArrayList<UserEntity> array = new ArrayList<>();
+            array.add(user);
+            return ResponseEntity.ok(array);
+        }
+
         return ResponseEntity.ok(userService.addUsers());
     }
 

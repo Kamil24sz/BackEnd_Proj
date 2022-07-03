@@ -1,9 +1,13 @@
 package com.example.demo.models;
 
+import com.example.demo.requests.UserRegisterRequest;
+import com.example.demo.security.SetupDataLoader;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.codehaus.jackson.annotate.JsonBackReference;
+import org.codehaus.jackson.annotate.JsonManagedReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.example.demo.security.SecurityConfiguration;
 
 import javax.persistence.*;
 import java.util.*;
@@ -15,7 +19,6 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class UserEntity{
 
     @Id

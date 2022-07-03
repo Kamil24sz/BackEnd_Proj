@@ -99,6 +99,9 @@ public class AuthenticationService implements UserDetailsService {
 
     public boolean logoutUser(HttpServletRequest httpServletRequest, String email){
         HttpSession session = httpServletRequest.getSession();
+        if (session.getAttribute(email) == null){
+            return false;
+        }
         session.removeAttribute(email); //root id
         return true;
     }

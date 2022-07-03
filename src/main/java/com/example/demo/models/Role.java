@@ -1,6 +1,8 @@
 package com.example.demo.models;
 
 import lombok.*;
+import org.codehaus.jackson.annotate.JsonBackReference;
+import org.codehaus.jackson.annotate.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -9,15 +11,13 @@ import java.util.Collection;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
-    @ManyToMany(mappedBy = "roles")
-    private Collection<UserEntity> users;
+
 
     @ManyToMany
     @JoinTable(
