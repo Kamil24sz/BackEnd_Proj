@@ -1,9 +1,9 @@
 package com.example.demo.services;
 
 import com.example.demo.models.Role;
-import com.example.demo.models.RoleRepository;
+import com.example.demo.models.repos.RoleRepository;
 import com.example.demo.models.UserEntity;
-import com.example.demo.models.UserRepository;
+import com.example.demo.models.repos.UserRepository;
 import com.example.demo.requests.UserLoginRequest;
 import com.example.demo.requests.UserRegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,6 @@ import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -36,16 +34,6 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
-
-    @PostConstruct
-    private void onCreate() {
-        // spring.jpa.hibernate.ddl-auto= update
-    }
-
-    @PreDestroy
-    private void onDestroy() {
-        // spring.jpa.hibernate.ddl-auto= update
-    }
 
     public Page<UserEntity> getUsersPaginated(int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber-1,pageSize);

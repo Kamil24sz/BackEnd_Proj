@@ -1,13 +1,14 @@
 package com.example.demo.security;
 
 import com.example.demo.models.*;
+import com.example.demo.models.repos.PrivilegeRepository;
+import com.example.demo.models.repos.RoleRepository;
+import com.example.demo.models.repos.UserRepository;
 import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;

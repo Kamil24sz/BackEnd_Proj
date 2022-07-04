@@ -1,13 +1,13 @@
 package com.example.demo.services;
 
 import com.example.demo.models.*;
+import com.example.demo.models.repos.RoleRepository;
+import com.example.demo.models.repos.UserRepository;
 import com.example.demo.requests.UserLoginRequest;
 import com.example.demo.requests.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,15 +31,6 @@ import java.util.List;
 @Service
 public class AuthenticationService implements UserDetailsService {
 
-   // @Value("${admin.username}")
-    //private String adminUserName;
-
-    //@Value("${admin.password")
-    //private String adminPassword;
-
-   // @Value("${admin.email")
-    //private String adminEmail;
-
     @Autowired
     private MailService mailService;
 
@@ -58,12 +49,18 @@ public class AuthenticationService implements UserDetailsService {
 
     public  boolean checkUser(String email){
         HttpSession session = httpServletRequest.getSession();
-        Long loggedUserID = (Long)session.getAttribute(email);
-        return loggedUserID != null;
+        Long creatorID = (Long)session.getAttribute(email);
+        if(creatorID == null){
+            return false;
+        }
+        UserEntity creator = userRepository.findById(creatorID).orElse(null);
+        if(creator == null){
+            return false;
+        }
+        return true;
     }
 
     public boolean registerUser(UserRegisterRequest userRegisterRequest) throws MessagingException {
-        //TODO zapis do bazy
 
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -90,7 +87,8 @@ public class AuthenticationService implements UserDetailsService {
 
         if(userService.login(userLoginRequest))     //todo: odczyt z bazy + test
         {
-            session.setAttribute(userLoginRequest.getEmail(), 1000L); //root id
+            UserEntity user = userRepository.findFirstByEmail(userLoginRequest.getEmail());
+            session.setAttribute(userLoginRequest.getEmail(), user.getId()); //root id
             return true;
         }
 

@@ -1,5 +1,6 @@
-package com.example.demo.models;
+package com.example.demo.models.repos;
 
+import com.example.demo.models.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
