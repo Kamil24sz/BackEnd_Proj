@@ -1,7 +1,11 @@
 package com.example.demo.controllers;
 
 import com.example.demo.models.UserEntity;
+import com.example.demo.requests.UserRegisterRequest;
+import com.example.demo.services.AuthenticationService;
 import com.example.demo.services.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +18,15 @@ import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Controller
 @Validated
 public class UsersController {
 
     private final UserService userService;
 
-    public UsersController(UserService userService) {
-        this.userService = userService;
-    }
+    private final AuthenticationService authenticationService;
+
 
     @GetMapping("/api/users")
     public ResponseEntity<Page<UserEntity>> getUsersPaginated(
@@ -68,5 +72,20 @@ public class UsersController {
     @ResponseBody
     public ResponseEntity<String> deleteUser(@PathVariable("id") long id) {
         return userService.deleteUser(id);
+    }
+
+    @RequestMapping(
+            value = "/api/admin/user/promote",
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseBody
+    public ResponseEntity<String> promoteUser(@RequestBody UserRegisterRequest user) {
+
+        if(authenticationService.promoteUser(user))
+            return ResponseEntity.ok("User promotion successful");
+
+        return ResponseEntity.ok("User promotion Failed");
     }
 }

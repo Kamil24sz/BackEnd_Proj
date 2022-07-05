@@ -7,7 +7,9 @@ import com.example.demo.requests.UserLoginRequest;
 import com.example.demo.requests.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,28 +25,25 @@ import org.springframework.web.client.RestTemplate;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
 public class AuthenticationService implements UserDetailsService {
 
-    @Autowired
-    private MailService mailService;
+    private final MailService mailService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    HttpServletRequest httpServletRequest;
+    private final HttpServletRequest httpServletRequest;
 
 
     public  boolean checkUser(String email){
@@ -151,5 +150,30 @@ public class AuthenticationService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(privilege));
         }
         return authorities;
+    }
+
+    @Transactional
+    @org.springframework.transaction.annotation.Transactional
+    @Modifying
+    public boolean promoteUser(UserRegisterRequest user) {
+        if (!checkUser(user.getEmail()))
+            return false;
+
+        UserEntity adminUser = userRepository.findFirstByEmail((user.getEmail()));
+        UserEntity promotedUser = userRepository.findById(user.getId()).orElse(null);
+        if(promotedUser.getRoles().stream().anyMatch(a -> a.getName().equals("ROLE_ADMIN")))
+            return false;
+        if(!adminUser.getRoles().stream().anyMatch(a -> a.getName().equals("ROLE_ADMIN")))
+            return false;
+
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+
+        List<Role> list = new ArrayList<Role>();
+        list.add(adminRole);
+
+        promotedUser.setRoles(list);
+        userRepository.save(promotedUser);
+
+        return true;
     }
 }

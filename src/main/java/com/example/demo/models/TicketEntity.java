@@ -1,5 +1,6 @@
 package com.example.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -23,9 +24,11 @@ public class TicketEntity {
     private String priority;
     private String resolution;
 
+    @JsonIgnore
     @OneToOne
     private UserEntity creator;
 
+    @JsonIgnore
     @OneToOne
     private UserEntity resolver;
 }

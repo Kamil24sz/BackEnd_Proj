@@ -6,11 +6,13 @@ import com.example.demo.models.UserEntity;
 import com.example.demo.models.repos.UserRepository;
 import com.example.demo.requests.UserLoginRequest;
 import com.example.demo.requests.UserRegisterRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,19 +23,14 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     public Page<UserEntity> getUsersPaginated(int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber-1,pageSize);
@@ -124,4 +121,6 @@ public class UserService {
             return new ResponseEntity<String>("{\"result\": false}", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }

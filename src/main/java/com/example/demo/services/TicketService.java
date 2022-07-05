@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -73,4 +75,59 @@ public class TicketService {
     }
 
 
+    public List<TicketEntity> showMyTickets(TicketCreationRequest ticket) {
+
+        if (!authenticationService.checkUser(ticket.getCreator()))
+            return new ArrayList<>();
+
+        return ticketRepository.getAllByCreator(userRepository.findFirstByEmail(ticket.getCreator()));
+
+    }
+
+    public List<TicketEntity> showAllTickets(TicketCreationRequest ticket) {
+        if (!authenticationService.checkUser(ticket.getCreator()))
+            return new ArrayList<>();
+
+        return ticketRepository.findAllBy();
+    }
+
+    public List<TicketEntity> showOpenTickets(TicketCreationRequest ticket) {
+        if (!authenticationService.checkUser(ticket.getCreator()))
+            return new ArrayList<>();
+
+        return ticketRepository.findAllByStatus("open");
+    }
+
+    public List<TicketEntity> showClosedTickets(TicketCreationRequest ticket) {
+        if (!authenticationService.checkUser(ticket.getCreator()))
+            return new ArrayList<>();
+
+        return ticketRepository.findAllByStatus("closed");
+    }
+
+    public List<TicketEntity> showResolvedByMeTickets(TicketCreationRequest ticket) {
+        if (!authenticationService.checkUser(ticket.getCreator()))
+            return new ArrayList<>();
+
+        return ticketRepository.findAllByResolver(userRepository.findFirstByEmail(ticket.getCreator()));
+    }
+
+    public String resolveTicket(TicketEntity ticket) {
+        if (!authenticationService.checkUser(ticket.getStatus()))
+            return "Failed to authorise";
+
+        TicketEntity originalTicket = ticketRepository.findById(ticket.getId()).orElse(null);
+        if(originalTicket == null)
+            return "Failed to add resolution note";
+
+        if (ticket.getResolution() == null)
+            return "Resolution note cannot be null";
+
+        originalTicket.setResolution(ticket.getResolution());
+        originalTicket.setResolver(userRepository.findFirstByEmail(ticket.getStatus()));
+        originalTicket.setStatus("closed");
+        ticketRepository.saveAndFlush(originalTicket);
+        return "Resolution note added successfully, ticket changed status to closed";
+
+    }
 }
