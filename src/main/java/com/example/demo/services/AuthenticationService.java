@@ -84,7 +84,7 @@ public class AuthenticationService implements UserDetailsService {
     public boolean loginUser(HttpServletRequest httpServletRequest, UserLoginRequest userLoginRequest){
         HttpSession session = httpServletRequest.getSession();
 
-        if(userService.login(userLoginRequest))     //todo: odczyt z bazy + test
+        if(userService.login(userLoginRequest))
         {
             UserEntity user = userRepository.findFirstByEmail(userLoginRequest.getEmail());
             session.setAttribute(userLoginRequest.getEmail(), user.getId()); //root id
@@ -152,18 +152,11 @@ public class AuthenticationService implements UserDetailsService {
         return authorities;
     }
 
-    @Transactional
-    @org.springframework.transaction.annotation.Transactional
-    @Modifying
-    public boolean promoteUser(UserRegisterRequest user) {
-        if (!checkUser(user.getEmail()))
-            return false;
+    public boolean promoteUser(long id) {
 
-        UserEntity adminUser = userRepository.findFirstByEmail((user.getEmail()));
-        UserEntity promotedUser = userRepository.findById(user.getId()).orElse(null);
+
+        UserEntity promotedUser = userRepository.findById(id).orElse(null);
         if(promotedUser.getRoles().stream().anyMatch(a -> a.getName().equals("ROLE_ADMIN")))
-            return false;
-        if(!adminUser.getRoles().stream().anyMatch(a -> a.getName().equals("ROLE_ADMIN")))
             return false;
 
         Role adminRole = roleRepository.findByName("ROLE_ADMIN");
@@ -173,6 +166,32 @@ public class AuthenticationService implements UserDetailsService {
 
         promotedUser.setRoles(list);
         userRepository.save(promotedUser);
+
+        return true;
+    }
+
+    public boolean degradeUser(long id) {
+
+        UserEntity degradedUser = userRepository.findById(id).orElse(null);
+        if(degradedUser.getRoles().stream().anyMatch(a -> a.getName().equals("ROLE_USER")))
+            return false;
+
+        Role userRole = roleRepository.findByName("ROLE_USER");
+
+        List<Role> list = new ArrayList<Role>();
+        list.add(userRole);
+
+        degradedUser.setRoles(list);
+        userRepository.save(degradedUser);
+
+        return true;
+    }
+
+    public boolean deleteUser(long id) {
+
+        UserEntity deletedUser = userRepository.findById(id).orElse(null);
+
+        userRepository.delete(deletedUser);
 
         return true;
     }

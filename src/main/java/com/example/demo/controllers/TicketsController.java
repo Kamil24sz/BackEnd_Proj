@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -130,5 +127,20 @@ public class TicketsController {
             @RequestBody TicketEntity ticket
     ){
         return ticketService.resolveTicket(ticket);
+    }
+
+    @RequestMapping(
+            value = "/api/admin/ticket/priority/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.PUT
+    )
+    @ResponseBody
+    public String changeTicketPriority(
+            HttpServletRequest httpServletRequest,
+            @RequestBody TicketEntity ticket, @PathVariable long id
+    ){
+       String a =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        //return ticketService.resolveTicket(id, ticket);
+        return"ok";
     }
 }

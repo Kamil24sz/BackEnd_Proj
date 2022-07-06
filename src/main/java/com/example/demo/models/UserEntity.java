@@ -5,6 +5,8 @@ import com.example.demo.security.SetupDataLoader;
 import lombok.*;
 import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonManagedReference;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.example.demo.security.SecurityConfiguration;
@@ -38,5 +40,8 @@ public class UserEntity{
             inverseJoinColumns = @JoinColumn(name = "Role_id")
     )
     private Collection<Role> roles;
+
+    @OneToMany
+    private final List<TicketEntity> ticket = new ArrayList<>();
 
 }

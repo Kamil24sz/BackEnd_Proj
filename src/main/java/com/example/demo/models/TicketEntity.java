@@ -2,6 +2,8 @@ package com.example.demo.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -25,10 +27,11 @@ public class TicketEntity {
     private String resolution;
 
     @JsonIgnore
-    @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne
     private UserEntity creator;
 
     @JsonIgnore
-    @OneToOne
+    @ManyToOne
     private UserEntity resolver;
 }

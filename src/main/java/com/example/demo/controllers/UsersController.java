@@ -74,18 +74,27 @@ public class UsersController {
         return userService.deleteUser(id);
     }
 
-    @RequestMapping(
-            value = "/api/admin/user/promote",
-            method = RequestMethod.PUT,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @RequestMapping("/api/admin/user/promote/{id}")
     @ResponseBody
-    public ResponseEntity<String> promoteUser(@RequestBody UserRegisterRequest user) {
+    public String promoteUser(@PathVariable long id){
+        if(authenticationService.promoteUser(id))
+            return "Users privilege promoted successfully!";
+        return "Failed to promote user privilege!";
+    }
 
-        if(authenticationService.promoteUser(user))
-            return ResponseEntity.ok("User promotion successful");
+    @RequestMapping("/api/admin/user/degrade/{id}")
+    @ResponseBody
+    public String degradeUser(@PathVariable long id){
+        if(authenticationService.degradeUser(id))
+            return "Users privilege degraded successfully!";
+        return "Failed to degrade user privilege!";
+    }
 
-        return ResponseEntity.ok("User promotion Failed");
+    @RequestMapping("/api/admin/user/remove/{id}")
+    @ResponseBody
+    public String deletedUser(@PathVariable long id){
+        if(authenticationService.deleteUser(id))
+            return "Users deleted successfully!";
+        return "Failed to delete user!";
     }
 }
