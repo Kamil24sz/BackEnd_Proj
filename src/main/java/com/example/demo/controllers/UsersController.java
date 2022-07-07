@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
@@ -35,18 +36,6 @@ public class UsersController {
         return ResponseEntity.ok(userService.getUsersPaginated(pageNumber,pageSize));
     }
 
-    @GetMapping("/api/users/add")
-    public ResponseEntity<List<UserEntity>> addUsers() {
-        if(userService.addUsers() == null) {
-            UserEntity user = new UserEntity(0L,"Użytkownicy już istnieją","Użytkownicy już istnieją","","",false,false,null);
-            ArrayList<UserEntity> array = new ArrayList<>();
-            array.add(user);
-            return ResponseEntity.ok(array);
-        }
-
-        return ResponseEntity.ok(userService.addUsers());
-    }
-
     @RequestMapping(
             value = "/api/user/create",
             method = RequestMethod.POST,
@@ -60,7 +49,10 @@ public class UsersController {
     }
 
     @GetMapping("/api/users/{id}")
-    public ResponseEntity<UserEntity> findUser(@PathVariable Long id) {
+    public ResponseEntity<UserEntity> findUser(@PathVariable Long id, HttpServletRequest httpServletRequest) {
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+
         return userService.findUser(id);
     }
 
@@ -92,7 +84,10 @@ public class UsersController {
 
     @RequestMapping("/api/admin/user/remove/{id}")
     @ResponseBody
-    public String deletedUser(@PathVariable long id){
+    public String deletedUser(HttpServletRequest httpServletRequest, @PathVariable long id){
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "Admin not login in!";
+
         if(authenticationService.deleteUser(id))
             return "Users deleted successfully!";
         return "Failed to delete user!";

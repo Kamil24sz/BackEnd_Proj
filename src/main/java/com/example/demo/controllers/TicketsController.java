@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -29,118 +30,142 @@ public class TicketsController {
             HttpServletRequest httpServletRequest,
             @RequestBody TicketCreationRequest ticket
     ){
-        if(this.ticketService.createTicket(ticket))
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not logged in";
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        if(this.ticketService.createTicket(ticket, email))
             return "Ticket created successfully!";
 
         return "Failed to create ticket!";
     }
 
     @RequestMapping(
-            value = "/api/ticket/modify",
+            value = "/api/ticket/{id}/modify",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             method = RequestMethod.PUT
     )
     @ResponseBody
     public String modifyTicket(
             HttpServletRequest httpServletRequest,
-            @RequestBody TicketCreationRequest ticket
+            @RequestBody TicketCreationRequest ticket, @PathVariable long id
     ){
-        if(this.ticketService.modifyTicket(ticket))
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not logged in";
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        if(this.ticketService.modifyTicket(ticket, id, email))
             return "Ticket modified successfully!";
 
         return "Failed to modify ticket!";
     }
 
     @RequestMapping(
-            value = "/api/ticket/show/mine",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            value = "/api/ticket/show/mine"
     )
     @ResponseBody
     public List<TicketEntity> showMineTickets(
-            HttpServletRequest httpServletRequest,
-            @RequestBody TicketCreationRequest ticket
+            HttpServletRequest httpServletRequest
     ){
-            return ticketService.showMyTickets(ticket);
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+            return ticketService.showMyTickets(email);
     }
 
     @RequestMapping(
-            value = "/api/admin/ticket/show/all",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            value = "/api/admin/ticket/show/all"
     )
     @ResponseBody
     public List<TicketEntity> showAllTickets(
-            HttpServletRequest httpServletRequest,
-            @RequestBody TicketCreationRequest ticket
+            HttpServletRequest httpServletRequest
     ){
-        return ticketService.showAllTickets(ticket);
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        return ticketService.showAllTickets(email);
     }
 
     @RequestMapping(
-            value = "/api/admin/ticket/show/open",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            value = "/api/admin/ticket/show/open"
     )
     @ResponseBody
     public List<TicketEntity> showOpenTickets(
-            HttpServletRequest httpServletRequest,
-            @RequestBody TicketCreationRequest ticket
+            HttpServletRequest httpServletRequest
     ){
-        return ticketService.showOpenTickets(ticket);
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        return ticketService.showOpenTickets(email);
     }
 
     @RequestMapping(
-            value = "/api/admin/ticket/show/closed",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            value = "/api/admin/ticket/show/closed"
     )
     @ResponseBody
     public List<TicketEntity> showClosedTickets(
-            HttpServletRequest httpServletRequest,
-            @RequestBody TicketCreationRequest ticket
+            HttpServletRequest httpServletRequest
     ){
-        return ticketService.showClosedTickets(ticket);
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        return ticketService.showClosedTickets(email);
     }
 
     @RequestMapping(
-            value = "/api/admin/ticket/show/resolved/ByMe",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            value = "/api/admin/ticket/show/resolved/ByMe"
     )
     @ResponseBody
     public List<TicketEntity> showResolvedByMeTickets(
-            HttpServletRequest httpServletRequest,
-            @RequestBody TicketCreationRequest ticket
+            HttpServletRequest httpServletRequest
     ){
-        return ticketService.showResolvedByMeTickets(ticket);
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        return ticketService.showResolvedByMeTickets(email);
     }
 
     @RequestMapping(
-            value = "/api/admin/ticket/resolve",
+            value = "/api/admin/ticket/{id}/resolve",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             method = RequestMethod.PUT
     )
     @ResponseBody
     public String resolveTicket(
             HttpServletRequest httpServletRequest,
-            @RequestBody TicketEntity ticket
+            @RequestBody TicketEntity ticket, @PathVariable long id
     ){
-        return ticketService.resolveTicket(ticket);
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not login in!";
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+        return ticketService.resolveTicket(ticket, id, email);
     }
 
     @RequestMapping(
-            value = "/api/admin/ticket/priority/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.PUT
+            value = "/api/admin/ticket/{priority}"
     )
     @ResponseBody
     public String changeTicketPriority(
             HttpServletRequest httpServletRequest,
-            @RequestBody TicketEntity ticket, @PathVariable long id
-    ){
-       String a =  httpServletRequest.getSession().getAttributeNames().nextElement();
-        //return ticketService.resolveTicket(id, ticket);
-        return"ok";
+            @PathVariable String priority, @RequestParam long id
+            ){
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not login in!";
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        return ticketService.changeTicketPriority(id, email, priority);
     }
 }

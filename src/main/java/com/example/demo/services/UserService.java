@@ -37,39 +37,8 @@ public class UserService {
         return userRepository.findAll(pageRequest);
     }
 
-    public List<UserEntity> addUsers() {
-        if(userRepository.findByEmail("kamil240sz@gmail.com") != null)
-            return null;
-        List<UserEntity> users = new ArrayList<>();
-        users.add(new UserEntity());
-        users.add(new UserEntity());
-        users.add(new UserEntity());
-
-        users.get(0).setFirstname("Kamil");
-        users.get(0).setLastname("Szczypczyk");
-        users.get(0).setEmail("kamil240sz@gmail.com");
-
-        users.get(1).setFirstname("Adam");
-        users.get(1).setLastname("Kowalski");
-        users.get(1).setEmail("akowalski@gmail.com");
-
-        users.get(2).setFirstname("Piotr");
-        users.get(2).setLastname("Nowak");
-        users.get(2).setEmail("pnowak@gmail.com");
-
-        for (int x = 0; x<3; x++){
-            users.get(x).setPassword(bCryptPasswordEncoder.encode("password"));
-            users.get(x).setEnabled(true);
-            Role role = roleRepository.findByName("ROLE_USER");
-            users.get(x).setRoles(Arrays.asList(role));
-        }
-
-        return userRepository.saveAllAndFlush(users);
-    }
-
     public boolean checkIfUserExists(String email){
-        List<UserEntity> users = userRepository.findByEmail(email);
-        if(users.size()>0)
+        if(userRepository.findByEmail(email).size() > 0)
             return true;
         return false;
     }

@@ -28,14 +28,14 @@ public class TicketService {
 
     private final AuthenticationService authenticationService;
 
-    public boolean createTicket(TicketCreationRequest ticket){
+    public boolean createTicket(TicketCreationRequest ticket, String  email){
         try{
-            if (!authenticationService.checkUser(ticket.getCreator()))
+            if (!authenticationService.checkUser(email))
                 return false;
             TicketEntity ticketEntity = new TicketEntity();
             ticketEntity.setTitle(ticket.getTitle());
             ticketEntity.setDescription(ticket.getDescription());
-            ticketEntity.setCreator(userRepository.findFirstByEmail(ticket.getCreator()));
+            ticketEntity.setCreator(userRepository.findFirstByEmail(email));
             ticketEntity.setStatus("open");
             ticketEntity.setPriority("medium");
             ticketRepository.saveAndFlush(ticketEntity);
@@ -46,17 +46,17 @@ public class TicketService {
             return false;
         }
     }
-    public boolean modifyTicket(TicketCreationRequest ticket){
-        if (!authenticationService.checkUser(ticket.getCreator()))
+    public boolean modifyTicket(TicketCreationRequest ticket, long id, String email){
+        if (!authenticationService.checkUser(email))
             return false;
-        if ((Long)ticket.getId() == null)
+        if ((Long)id == null)
             return false;
-        TicketEntity originalTicket = ticketRepository.findById(ticket.getId()).orElse(null);
+        TicketEntity originalTicket = ticketRepository.findById(id).orElse(null);
 
         if(originalTicket == null)
             return false;
 
-        if (!originalTicket.getCreator().getEmail().equals((ticket.getCreator())))
+        if (!originalTicket.getCreator().getEmail().equals(email))
             return false;
 
 
@@ -75,48 +75,44 @@ public class TicketService {
     }
 
 
-    public List<TicketEntity> showMyTickets(TicketCreationRequest ticket) {
-
-        if (!authenticationService.checkUser(ticket.getCreator()))
+    public List<TicketEntity> showMyTickets(String email) {
+        if (!authenticationService.checkUser(email))
             return new ArrayList<>();
 
-        return ticketRepository.getAllByCreator(userRepository.findFirstByEmail(ticket.getCreator()));
+        return ticketRepository.getAllByCreator(userRepository.findFirstByEmail(email));
 
     }
 
-    public List<TicketEntity> showAllTickets(TicketCreationRequest ticket) {
-        if (!authenticationService.checkUser(ticket.getCreator()))
+    public List<TicketEntity> showAllTickets(String email) {
+        if (!authenticationService.checkUser(email))
             return new ArrayList<>();
 
         return ticketRepository.findAllBy();
     }
 
-    public List<TicketEntity> showOpenTickets(TicketCreationRequest ticket) {
-        if (!authenticationService.checkUser(ticket.getCreator()))
+    public List<TicketEntity> showOpenTickets(String email) {
+        if (!authenticationService.checkUser(email))
             return new ArrayList<>();
 
         return ticketRepository.findAllByStatus("open");
     }
 
-    public List<TicketEntity> showClosedTickets(TicketCreationRequest ticket) {
-        if (!authenticationService.checkUser(ticket.getCreator()))
+    public List<TicketEntity> showClosedTickets(String email) {
+        if (!authenticationService.checkUser(email))
             return new ArrayList<>();
 
         return ticketRepository.findAllByStatus("closed");
     }
 
-    public List<TicketEntity> showResolvedByMeTickets(TicketCreationRequest ticket) {
-        if (!authenticationService.checkUser(ticket.getCreator()))
+    public List<TicketEntity> showResolvedByMeTickets(String email) {
+        if (!authenticationService.checkUser(email))
             return new ArrayList<>();
 
-        return ticketRepository.findAllByResolver(userRepository.findFirstByEmail(ticket.getCreator()));
+        return ticketRepository.findAllByResolver(userRepository.findFirstByEmail(email));
     }
 
-    public String resolveTicket(TicketEntity ticket) {
-        if (!authenticationService.checkUser(ticket.getStatus()))
-            return "Failed to authorise";
-
-        TicketEntity originalTicket = ticketRepository.findById(ticket.getId()).orElse(null);
+    public String resolveTicket(TicketEntity ticket, long id, String email) {
+        TicketEntity originalTicket = ticketRepository.findById(id).orElse(null);
         if(originalTicket == null)
             return "Failed to add resolution note";
 
@@ -124,10 +120,35 @@ public class TicketService {
             return "Resolution note cannot be null";
 
         originalTicket.setResolution(ticket.getResolution());
-        originalTicket.setResolver(userRepository.findFirstByEmail(ticket.getStatus()));
+        originalTicket.setResolver(userRepository.findFirstByEmail(email));
         originalTicket.setStatus("closed");
         ticketRepository.saveAndFlush(originalTicket);
         return "Resolution note added successfully, ticket changed status to closed";
 
+    }
+
+    public String changeTicketPriority(long id, String email, String priority) {
+
+        if (email == null)
+            return "User is not log in!";
+
+        if (!authenticationService.checkUser(email))
+            return "Failed to authorise";
+
+        TicketEntity originalTicket = ticketRepository.findById(id).orElse(null);
+
+        if(originalTicket == null)
+            return "Failed to change ticket priority, ticket is null!";
+
+        if (priority == null)
+            return "Priority cannot be null!";
+
+        if ((priority.equals(originalTicket.getPriority())))
+            return "Priority is already set to provided value";
+
+        originalTicket.setPriority(priority);
+
+        ticketRepository.saveAndFlush(originalTicket);
+        return "Ticket priority changed successful!";
     }
 }

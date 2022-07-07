@@ -26,19 +26,34 @@ public class AuthenticationController {
     final private UserService userService;
 
     @RequestMapping(
-            value = "/api/user/check",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            value = "/api/user/check"
     )
     @ResponseBody
     public String checkUser(
-            HttpServletRequest httpServletRequest,
-            @RequestBody UserRegisterRequest userRegisterRequest
+            HttpServletRequest httpServletRequest
     ){
-        if(this.authenticationService.checkUser( userRegisterRequest.getEmail()))
-            return "User already logged in";
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not login in!";
+        else {
+            String email = httpServletRequest.getSession().getAttributeNames().nextElement();
 
+            if (this.authenticationService.checkUser(email))
+                return "User already logged in";
+        }
         return "User not logged in!";
+    }
+    @RequestMapping(
+            value = "/api/user/check/{email}"
+    )
+    @ResponseBody
+    public String checkIfUserExists(
+            HttpServletRequest httpServletRequest,
+            @PathVariable String email
+    ){
+        if (userService.checkIfUserExists(email))
+            return "User already exists";
+        return "User does not exist";
+
     }
 
     @RequestMapping(
