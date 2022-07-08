@@ -1,6 +1,9 @@
 package com.example.demo.controllers;
 
+import com.example.demo.models.Role;
 import com.example.demo.models.UserEntity;
+import com.example.demo.models.repos.RoleRepository;
+import com.example.demo.models.repos.UserRepository;
 import com.example.demo.requests.UserRegisterRequest;
 import com.example.demo.services.AuthenticationService;
 import com.example.demo.services.UserService;
@@ -28,6 +31,9 @@ public class UsersController {
 
     private final AuthenticationService authenticationService;
 
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
 
     @GetMapping("/api/users")
     public ResponseEntity<Page<UserEntity>> getUsersPaginated(
@@ -52,6 +58,12 @@ public class UsersController {
     public ResponseEntity<UserEntity> findUser(@PathVariable Long id, HttpServletRequest httpServletRequest) {
         if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
             return null;
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        if(!CheckIfAdmin(email)){
+            return null;
+        }
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
 
         return userService.findUser(id);
     }
@@ -62,13 +74,26 @@ public class UsersController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ResponseBody
-    public ResponseEntity<String> deleteUser(@PathVariable("id") long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable("id") long id, HttpServletRequest httpServletRequest) {
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return null;
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        if(!CheckIfAdmin(email)){
+            return null;
+        }
         return userService.deleteUser(id);
     }
 
     @RequestMapping("/api/admin/user/promote/{id}")
     @ResponseBody
-    public String promoteUser(@PathVariable long id){
+    public String promoteUser(@PathVariable long id, HttpServletRequest httpServletRequest){
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not login in!";
+
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        if(!CheckIfAdmin(email)){
+            return "User has no privilege";
+        }
         if(authenticationService.promoteUser(id))
             return "Users privilege promoted successfully!";
         return "Failed to promote user privilege!";
@@ -76,7 +101,13 @@ public class UsersController {
 
     @RequestMapping("/api/admin/user/degrade/{id}")
     @ResponseBody
-    public String degradeUser(@PathVariable long id){
+    public String degradeUser(@PathVariable long id, HttpServletRequest httpServletRequest){
+        if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
+            return "User not login in!";
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        if(!CheckIfAdmin(email)){
+            return "User has no privilege";
+        }
         if(authenticationService.degradeUser(id))
             return "Users privilege degraded successfully!";
         return "Failed to degrade user privilege!";
@@ -88,8 +119,20 @@ public class UsersController {
         if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
             return "Admin not login in!";
 
+        String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        if(!CheckIfAdmin(email)){
+            return "User has no privilege";
+        }
+
         if(authenticationService.deleteUser(id))
             return "Users deleted successfully!";
         return "Failed to delete user!";
+    }
+
+    public boolean CheckIfAdmin(String email){
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+        if(userRepository.findFirstByEmail(email).getRoles().contains(adminRole))
+            return true;
+        return false;
     }
 }

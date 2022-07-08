@@ -24,10 +24,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         protected void configure(HttpSecurity http) throws Exception {
             http.cors().and().csrf().disable()
                     .authorizeRequests()
-                    .mvcMatchers(HttpMethod.GET, "/**").permitAll()
-                    .mvcMatchers(HttpMethod.POST, "/**").permitAll()
-                    .mvcMatchers(HttpMethod.PUT, "/**").permitAll()
-                   // .mvcMatchers(HttpMethod.GET, "/api/**").hasRole("USER")
+                    .mvcMatchers(HttpMethod.GET, "/api/**").permitAll()
+                    .mvcMatchers(HttpMethod.POST, "/api/**").permitAll()
+                    .mvcMatchers(HttpMethod.PUT, "/api/**").permitAll()
+
+                    //.mvcMatchers(HttpMethod.GET, "/api/ticket/**").hasAnyAuthority("ROLE_USER","USER")
+                    //.mvcMatchers(HttpMethod.POST, "/api/ticket/**").hasAnyAuthority("ROLE_USER","USER")
+                    //.mvcMatchers(HttpMethod.PUT, "/api/ticket/**").hasAnyAuthority("ROLE_USER","USER")
+//
+                    //.mvcMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
+                    //.mvcMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
+                    //.mvcMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                     .and()
                     .httpBasic();

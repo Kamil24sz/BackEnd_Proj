@@ -1,6 +1,9 @@
 package com.example.demo.controllers;
 
+import com.example.demo.models.Role;
 import com.example.demo.models.TicketEntity;
+import com.example.demo.models.repos.RoleRepository;
+import com.example.demo.models.repos.UserRepository;
 import com.example.demo.requests.TicketCreationRequest;
 import com.example.demo.requests.UserRegisterRequest;
 import com.example.demo.services.TicketService;
@@ -19,6 +22,10 @@ import java.util.List;
 public class TicketsController {
 
     private final TicketService ticketService;
+
+    private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
 
     @RequestMapping(
             value = "/api/ticket/create",
@@ -89,6 +96,10 @@ public class TicketsController {
 
         String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
 
+        if(!CheckIfAdmin(email)){
+            return null;
+        }
+
         return ticketService.showAllTickets(email);
     }
 
@@ -103,6 +114,11 @@ public class TicketsController {
             return null;
 
         String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+
+
+        if(!CheckIfAdmin(email)){
+            return null;
+        }
 
         return ticketService.showOpenTickets(email);
     }
@@ -119,6 +135,10 @@ public class TicketsController {
 
         String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
 
+
+        if(!CheckIfAdmin(email)){
+            return null;
+        }
         return ticketService.showClosedTickets(email);
     }
 
@@ -134,6 +154,9 @@ public class TicketsController {
 
         String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
 
+        if(!CheckIfAdmin(email)){
+            return null;
+        }
         return ticketService.showResolvedByMeTickets(email);
     }
 
@@ -152,6 +175,9 @@ public class TicketsController {
 
         String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
 
+        if(!CheckIfAdmin(email)){
+            return "User has no privilege";
+        }
         return ticketService.resolveTicket(ticket, id, email);
     }
 
@@ -166,6 +192,16 @@ public class TicketsController {
         if (httpServletRequest.getSession().getAttributeNames().hasMoreElements() == false)
             return "User not login in!";
         String email =  httpServletRequest.getSession().getAttributeNames().nextElement();
+        if(!CheckIfAdmin(email)){
+            return "User has no privilege";
+        }
         return ticketService.changeTicketPriority(id, email, priority);
+    }
+
+    public boolean CheckIfAdmin(String email){
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+        if(userRepository.findFirstByEmail(email).getRoles().contains(adminRole))
+            return true;
+        return false;
     }
 }
